@@ -3,3 +3,13 @@
 <h4 align="center">🚧  Projeto em construção  🚧</h4>
 
 <h2 align="center">📖 Aprenda sobre as Funcionalidades 📖
+- 📂 Src
+  - 📁 Class
+  - 📁 Config
+  - 📁 Controllers
+  - 📁 Database
+  - 📁 Globals
+  - 📁 Helpers
+  - 📁 Interface
+  - 📁 Routes
+  - 📝 Server.ts
