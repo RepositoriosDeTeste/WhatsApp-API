@@ -24,9 +24,9 @@
     </li>
   </ul>
 </p>
-<script>
+"""js
   function classOpenFolder() {
     const classFolder = document.getElementById("closed-folder")
     classFolder.text = "📂 Class"
   }
-</script>
+"""
