@@ -4,6 +4,8 @@
 
 **WhatsApp-API** é um projeto que permite a interação programática com o WhatsApp. O objetivo principal do projeto é fornecer uma forma simples e eficiente para enviar e receber mensagens através do WhatsApp, facilitando a integração com outras aplicações e serviços.
 
+<p align="center"><code>🚧 PROJETO EM DESENVOLVIMENTO 🚧</code></p>
+
 ### Objetivos
 - Facilitar a comunicação via WhatsApp através de uma API.
 - Proporcionar uma solução flexível e extensível para desenvolvedores.
@@ -62,9 +64,8 @@
 A instancia é o ponto inicial para utilizar esta api, crie uma instancia com o nome ou numero do usuario para facilitar a identificação, note tambem que as identificações das keys são valores unicos
 
 #### Iniciando uma Instancia
-Para iniciar uma instancia, faça uma requisição POST para `/instance/init?key=<INSTANCE_KEY:string>&webhook=<WEBHOOK_ALLOWED:true or false>&webhookURL=<WEBHOOK_URL:string>` e substitua os valores entre `<>`. `Webhook` & `<webhookUrl>` são opcionais
-
-Retorno: 
+Para iniciar uma instancia, faça uma requisição POST para `/instance/init?key=<INSTANCE_KEY:string>&webhook=<WEBHOOK_ALLOWED:true or false>&webhookURL=<WEBHOOK_URL:string>` e substitua os valores entre `<>`. `webhook` & `webhookUrl` são opcionais
+<br>Retorno: 
   ```json
     {
     	"error": false,
@@ -78,6 +79,58 @@ Retorno:
     	}
     }
   ```
+
+#### QRCode em Base64
+Para que a instancia tenha sua inicialização concluida é necessario ler o qrcode, faça uma requisição GET para `/instance/qr?key=<INSTANCE_KEY:string>`, caso a instancia exista, sera retornado algo como:
+<br>Retorno:
+  ```json
+    {
+        "error": false,
+        "messages": "QRCode gerado com sucesso",
+        "qrcode": "<BASE64URL>"
+    }
+  ```
+
+#### Detalhes da Instancia
+Visualize o status da sua instancia fazendo uma requisição GET para `/instance/info?key=<INSTANCE_KEY:string>`
+<br>Retorno:
+  ```json
+    {
+        "error": false,
+        "message": "Informações da Instancia encontradas",
+        "instanceData": {
+            "instance_key": "<instanceKey>",
+            "phone_connected": "<BOOL>",
+            "user_details": {
+                "id": "<secretWhatsAppId>",
+                "lid": "<whatsAppLidKey>",
+                "name": "<instanceUsername>"
+            }
+        }
+     }
+  ```
+
+#### Lista Todas as Instancias
+Visualize o status de todas as Instancias iniciadas pela sua aplicação fazendo uma requisição para `/instance/list`
+<br>Retorno:
+  ```json
+    {
+        "error": false,
+        "message": "Todas as instancias listadas",
+        "data": {
+            "<instanceKey>": {
+                "instance_key": "<instanceKey>",
+                "phone_connected": "<BOOL>",
+                "user_details": {
+                    "id": "<secretWhatsAppId>",
+                    "lid": "<whatsAppLidKey>",
+                    "name": "<instanceUsername>"
+                }
+            }
+        }
+    }
+  ```
+
 
 
 
