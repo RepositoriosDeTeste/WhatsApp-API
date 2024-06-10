@@ -3,7 +3,7 @@
 <h4 align="center">🚧  Projeto em construção  🚧</h4>
 
 <h2 align="center">📖 Aprenda sobre as Funcionalidades 📖 </h2>
-  <p>
+  <p align="center">
     <ul>
       <li>📂 Src
         <ul>
