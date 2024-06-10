@@ -2,4 +2,4 @@
 <p align="center">Implementação de uma API, em TypeScript, utilizando <a href="https://expressjs.com/pt-br/">Express</a> e <a href="https://github.com/WhiskeySockets/Baileys">Baileys</a>. </p>
 <h4 align="center">:construction:  Projeto em construção  :construction:</h4>
 
-<h2 align="center">:flashlight: Aprenda sobre as Funcionalidades :flashlight:
+<h2 align="center">:hammer: Aprenda sobre as Funcionalidades
