@@ -7,7 +7,11 @@
   <ul>
     <li>📂 Src
       <ul>
-        <li>📁 Class</li>
+        <li id="closed-folder" class="closed-folder" onclick="">📁 Class</li>
+          <ul hidden class="classfiles">
+            <li>📓 instance.ts</li>
+            <li>📓 session.ts</li>
+          </ul>
         <li>📁 Config</li>
         <li>📁 Controllers</li>
         <li>📁 Database</li>
@@ -20,3 +24,9 @@
     </li>
   </ul>
 </p>
+<script>
+  function classOpenFolder() {
+    const classFolder = document.getElementById("closed-folder")
+    classFolder.text = "📂 Class"
+  }
+</script>
