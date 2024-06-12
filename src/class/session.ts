@@ -14,7 +14,7 @@ export class Session {
             allCollections.forEach(async (collection) => {
                 const instanceConfig = await db.collection(collection).findOne({instanceKey: collection})
                 if (instanceConfig) {
-                    const instance = new WhatsAppInstance(instanceConfig.instanceKey, instanceConfig.allowWebhook, instanceConfig.webhookUrl)
+                    const instance = new WhatsAppInstance(instanceConfig.allowWebhook, instanceConfig.webhookUrl, instanceConfig.instanceKey)
                     await instance.init()
                     whatsAppInstances[collection] = instance
                 }

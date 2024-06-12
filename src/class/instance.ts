@@ -1,9 +1,10 @@
 import pino from "pino";
+import { uuid } from "uuidv4";
 import { InstanceInterface } from "../interface/instance.interface";
 import axios, { AxiosInstance } from "axios";
 import { Collection, UpdateResult, WithId } from "mongodb";
 import { authState, configHandlers } from "../database/helpers";
-import makeWASocket, {DisconnectReason, BaileysEventMap, AnyMediaMessageContent, AnyMessageContent, WAPresence } from "baileys";
+import makeWASocket, {DisconnectReason, BaileysEventMap, AnyMediaMessageContent, AnyMessageContent, WAPresence, downloadMediaMessage } from "baileys";
 import EventEmitter from "events";
 import { toDataURL } from "qrcode";
 import { Boom } from "@hapi/boom";
@@ -11,6 +12,9 @@ import { Connection } from "mongoose";
 import { processButtonMessages } from "../helper/processButton";
 import { generateVc } from "../helper/genVc";
 import { MessageObject } from "../interface/message.interface";
+import { sleep } from "../helper/sleep";
+import { MIMEType } from "util";
+import { downloadMessage } from "../helper/donwloadMessageContent";
 
 
 export class WhatsAppInstance {
@@ -23,7 +27,7 @@ export class WhatsAppInstance {
         chats: [],
         messages: []
     }
-    collections: {api?: Collection, webhook?: Collection, chat?: Collection} = {}
+    collections: {api?: Collection, webhook?: Collection, chat?: Collection, files?: Collection} = {}
     authState: {
         state: any,
         saveCreds: (data: any, id: any) => any
@@ -38,33 +42,47 @@ export class WhatsAppInstance {
     webhook: string | undefined
     mongooseConnection: Connection | undefined
 
-    constructor (key: string, allowWebhook: boolean = global.appCfg.webhookEnabled, webhookUrl: string | undefined = global.appCfg.webhookUrl) {
-        this.key = key
+    constructor (allowWebhook: boolean = global.appCfg.webhookEnabled, webhookUrl: string | undefined = global.appCfg.webhookUrl, sessionKey?: string) {
+        if (sessionKey) {
+            this.key = sessionKey
+        }else {
+            this.key = uuid()
+        }
         this.allowWebhook = allowWebhook
         if (this.allowWebhook === true) {
-            this.webhook = webhookUrl
-            this.instance.customWebhook = webhookUrl
-            this.axiosInstance = axios.create({baseURL: webhookUrl})
+            if (webhookUrl) {
+                this.webhook = webhookUrl
+                this.instance.customWebhook = webhookUrl
+                this.axiosInstance = axios.create({baseURL: webhookUrl})
+            }
         }
         this.instance.key = this.key
     }
 
     async sendWebhook(type: string, body: {[keys: string]: any}, key: string) {
         if (this.axiosInstance) {
+            console.log("customWebhook")
             this.axiosInstance.post('', {type, body, instanceKey: key})
+        } else if( this.allowWebhook && !this.axiosInstance) {
+            console.log("defaultWebhook")
+            await this.collections.webhook?.insertOne({
+                type, body, instanceKey: key
+            })
         }
-    }
+    } 
 
     async init() {
         this.collections.api = mongoClient.db("WhatsApp-API").collection(this.key)
-        this.collections.chat = mongoClient.db("WhatsApp-Chats").collection("Chats")
-        this.collections.webhook = this.webhook !== undefined ? mongoClient.db("WhatsApp-Webhook").collection(this.key) : undefined;
+        this.collections.chat = mongoClient.db("WhatsApp-Chats").collection(this.key)
+        this.collections.webhook = this.allowWebhook !== undefined ? mongoClient.db("WhatsApp-Webhook").collection(this.key) : undefined;
+        this.collections.files = this.allowWebhook !== undefined ? mongoClient.db("WhatsApp-Files").collection(this.key) : undefined
         this.configs = await configHandlers(this.collections.api)
         this.authState = await authState(this.collections.api)
         await this.configs.writeConfig({instanceKey: this.key, allowWebhook: this.allowWebhook, webhookUrl: this.webhook})
         this.socketConfig.auth = this.authState.state
         this.instance.sock = makeWASocket(this.socketConfig)
         await this.setHandler()
+        await sleep(100)
         return this
     }
 
@@ -98,6 +116,8 @@ export class WhatsAppInstance {
                 }else {
                     await this.collections.api?.drop()
                     await this.collections.webhook?.drop()
+                    await this.collections.chat?.drop()
+                    await this.collections.files?.drop()
                     this.instance.online = false
                 }
             }else if (connection === 'open') {
@@ -152,22 +172,30 @@ export class WhatsAppInstance {
                 this.instance.chats.splice(index, 1)
             })
         })
-        sock?.ev.on('messages.upsert', async (msgs) => {
-            this.instance.messages.unshift(...msgs.messages)
-            if (appCfg.markMessagesAsRead) {
-                const unreadMessage = msgs.messages.map((msg) => {
-                    return {
-                        remoteJid: msg.key.remoteJid,
-                        id: msg.key.id,
-                        participant: msg.key?.participant
+        sock?.ev.on('messages.upsert', async ({messages}) => {
+            messages.forEach(async (message) => {
+                if (!message.message) {return}
+                const keysMessage = Object.keys(message.message)
+                const messageType = keysMessage[0]
+                const buffer = await downloadMessage(message)
+                if (buffer && this.collections.files) {
+                    await this.collections.files.insertOne({
+                        messageMime: messageType,
+                        chatId: message.key.remoteJid,
+                        messageData: Buffer.from(buffer).toString("base64"),
+                    })
+                }
+                this.instance.messages.push(message)
+                if (appCfg.markMessagesAsRead) {
+                    const unreadMessage = {
+                        remoteJid: message.key.remoteJid,
+                        id: message.key.id,
+                        participant: message.key?.participant
                     }
-                })
-                await sock.readMessages(unreadMessage)
-                msgs.messages.map(async (msg) => {
-                    await this.sendWebhook('message', {...msg}, this.key)
-                })
-                
-            }
+                    await sock.readMessages([unreadMessage])
+                    await this.sendWebhook('message', message, this.key)
+                }
+            })
         })
     }
 

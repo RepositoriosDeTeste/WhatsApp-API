@@ -1,35 +1,26 @@
 import { Request, Response } from "express";
 import { WhatsAppInstance } from "../class/instance";
+import { sleep } from "../helper/sleep";
 
 export async function init(req: Request, res: Response) {
-    const key = req.query.key
-    if (typeof key === 'string') {
-        const allowWebhook = !req.query.webhook ? false : ((req.query.webhook as unknown) as boolean)
-        const webhookUrl = !req.query.webhookUrl ? undefined : req.query.webhookUrl.toString()
-        const appUrl = `${appCfg.appUrl}` || `${req.protocol}://${req.headers.host}`
-        const instance = new WhatsAppInstance(key, allowWebhook, webhookUrl)
-        const data = await instance.init()
-        whatsAppInstances[data.key] = instance
-        res.json({
-            error: false,
-            message: "Instancia inicializada",
-            key: data.key,
-            webhook: {
-                enabled: allowWebhook,
-                webhookUrl: webhookUrl
-            },
-            qrcode: {
-                url: `${appUrl}/instance/qr?key=${data.key}`
-            }
-        })
-    }else {
-        return res.status(404).json(
-            {
-                error: true,
-                message: "Informe a key da instancia que sera iniciada"
-            }
-        )
-    }
+    const allowWebhook = req.query.webhook === 'true' || false
+    const webhookUrl = !req.query.webhookUrl ? undefined : req.query.webhookUrl.toString()
+    const appUrl = `${appCfg.appUrl}` || `${req.protocol}://${req.headers.host}`
+    const instance = new WhatsAppInstance(allowWebhook, webhookUrl)
+    const data = await instance.init()
+    whatsAppInstances[data.key] = instance
+    res.json({
+        error: false,
+        message: "Instancia inicializada",
+        key: data.key,
+        webhook: {
+            enabled: allowWebhook,
+            webhookUrl: webhookUrl
+        },
+        qrcode: {
+            url: `${appUrl}/instance/qr?key=${data.key}`
+        }
+    })
 }
 
 export async function info(req: Request, res: Response) {
@@ -60,6 +51,10 @@ export async function qrBase64(req: Request, res: Response) {
     const key = req.query.key
     if (typeof key === 'string') {
         try {
+            while ( !whatsAppInstances[key]?.instance.qr){
+                console.log(whatsAppInstances[key]?.instance.qr)
+                await sleep(100)
+            }
             const qr = whatsAppInstances[key]?.instance.qr
             res.json({
                 error: false,

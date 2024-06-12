@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsx watch src/server.ts"
+    "start": "tsx watch src/server.ts",
+    "test:cfg": "tsx watch src/config/globals.config.ts"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
     "multer": "^1.4.5-lts.1",
     "qrcode": "^1.5.3",
     "qrcode-terminal": "^0.12.0",
-    "tsx": "^4.11.0"
+    "tsx": "^4.11.0",
+    "uuidv4": "^6.2.13"
   }
 }
