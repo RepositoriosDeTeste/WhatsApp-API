@@ -11,7 +11,7 @@ async function initMongooseClient() {
 namespace appConfig {
     export const token: string = process.env.TOKEN || '';
     export const protectRoutes: boolean = process.env.PROTECT_ROUTES === 'true' || false;
-    export const port: number = Number(process.env.PORT) || 8080;
+    export const port: number = Number(process.env.PORT) || 10000;
     export const appUrl: string = process.env.APP_URL || `http://localhost:${port}`;
     export const restoreSessionOnStart: boolean = process.env.RESTORE_SESSIONS_ON_START === 'true' || false;
     export const logLevel: string = process.env.LOG_LEVEL || 'silent';
