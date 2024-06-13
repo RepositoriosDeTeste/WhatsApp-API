@@ -245,27 +245,14 @@ export class WhatsAppInstance {
         return result
     }
     
-    async sendMediaMessage(to: string, file: any, type: "image" | "audio" | "video" | "document", caption?: string | boolean) {
+    async sendMediaMessage(to: string, file: any, type: "image" | "audio" | "video" | "document", caption?: string, ptt?: boolean, fileName?: string) {
         await this.verifyWhatsAppId(this.getWhatsAppId(to))
         let fileInfo: any = {
             mimetype: file.mimetype,
-            fileName: file.originalname,
-        }
-        if (type === "image") {
-            fileInfo["image"] = file.buffer
-            fileInfo["caption"] = caption ? caption : ""
-        }else if (type === "audio") {
-            fileInfo["audio"] = file.buffer
-            if (caption) {
-                caption = Boolean(caption)
-                fileInfo["ptt"] = caption ? caption : false
-            }
-        }else if (type === "video") {
-            fileInfo["video"] = file.buffer
-            fileInfo["caption"] = caption ? caption : ""
-        }else if (type === "document") {
-            fileInfo["document"] = file.buffer
-            fileInfo["caption"] = caption ? caption : ""
+            [type]: file.buffer,
+            caption: ["video", "image", "document"].includes(type) ? caption : undefined,
+            ptt: type === "audio" && ptt ? ptt : undefined,
+            fileName: type === "document" && fileName ? fileName : file.originalname,
         }
         const result = await this.instance.sock?.sendMessage(
             this.getWhatsAppId(to),
@@ -274,13 +261,14 @@ export class WhatsAppInstance {
         return result
     }
 
-    async sendUrlMediaMessage(to: string, url: string, type: any, mimetype: any, caption?: string) {
+    async sendUrlMediaMessage(to: string, url: string, type: any, mimetype: any, caption?: string, ptt?: boolean, fileName?: string) {
         await this.verifyWhatsAppId(this.getWhatsAppId(to))
         let content: any = {
             [type]: {url: url},
             mimetype: mimetype,
-            caption: caption && typeof caption !== "boolean" ? caption : undefined,
-            ptt: caption && typeof caption === "boolean" ? caption : undefined
+            caption: ["video", "image", "document"].includes(type) ? caption : undefined,
+            ptt: type === "audio" && ptt ? ptt : undefined,
+            fileName: type === "document" && fileName ? fileName : undefined,
         }
         const result = await this.instance.sock?.sendMessage(
             this.getWhatsAppId(to),
