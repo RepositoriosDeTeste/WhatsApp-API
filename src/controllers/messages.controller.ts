@@ -30,7 +30,7 @@ export async function sendImageMessage(req: Request, res: Response) {
     if (typeof key === 'string') {
         if (req.file) {
             try {
-                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'image', req.body?.caption)
+                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'image', req.body?.caption, req.body?.ptt, req.body?.fileName)
                 res.status(201).json({
                     error: false,
                     data: data
@@ -60,7 +60,7 @@ export async function sendAudioMessage(req: Request, res: Response) {
     if (typeof key === 'string') {
         if (req.file) {
             try {
-                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'audio', req.body?.ptt)
+                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'audio', req.body?.caption, req.body?.ptt, req.body?.fileName)
                 res.status(201).json({
                     error: false,
                     data: data
@@ -90,7 +90,7 @@ export async function sendVideoMessage(req: Request, res: Response) {
     if (typeof key === 'string') {
         if (req.file) {
             try {
-                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'video', req.body?.caption)
+                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'video', req.body?.caption, req.body?.ptt, req.body?.fileName)
                 res.status(201).json({
                     error: false,
                     data: data
@@ -120,7 +120,7 @@ export async function sendDocumentMessage(req: Request, res: Response) {
     if (typeof key === 'string') {
         if (req.file) {
             try {
-                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'document', req.body?.caption)
+                const data = await whatsAppInstances[key].sendMediaMessage(req.body.id, req.file, 'document', req.body?.caption, req.body?.ptt, req.body?.fileName)
                 res.status(201).json({
                     error: false,
                     data: data
@@ -149,7 +149,7 @@ export async function sendMediaUrl(req: Request, res: Response) {
     const key = req.query.key
     if (typeof key === 'string') {
         try {
-            const data = await whatsAppInstances[key].sendUrlMediaMessage(req.body.id, req.body.url, req.body.type, req.body.mimetype, req.body?.caption)
+            const data = await whatsAppInstances[key].sendUrlMediaMessage(req.body.id, req.body.url, req.body.type, req.body.mimetype, req.body?.caption, req.body?.ptt, req.body?.fileName)
             res.status(201).send({
                 error: false,
                 data: data

@@ -115,10 +115,10 @@ export class WhatsAppInstance {
                     await this.init()
                 }else {
                     await this.collections.api?.drop()
-                    await this.collections.webhook?.drop()
                     await this.collections.chat?.drop()
                     await this.collections.files?.drop()
                     this.instance.online = false
+                    await this.collections.webhook?.drop()
                 }
             }else if (connection === 'open') {
                 let alreadyThere = await this.collections.chat?.findOne({key: this.key})
@@ -511,5 +511,19 @@ export class WhatsAppInstance {
     async readMessage(msgObject: MessageObject) {
         const result = await this.instance.sock?.readMessages([msgObject])
         return result
+    }
+
+    async buildChatList(){
+        let Chats = await this.getChat()
+        let results: any[] = []
+        for (let chat of Chats) {
+            for (let data of chat) {
+                results.push({
+                    name: data.name,
+                    jid: data.id
+                })
+            }
+        }
+        return results
     }
  }

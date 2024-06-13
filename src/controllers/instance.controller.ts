@@ -149,5 +149,28 @@ export async function listInstances(req: Request, res: Response) {
             message: "Erro ao recuperar as informações da instancia"
         })
     }
-    
+}
+
+export async function getChats(req: Request, res: Response) {
+    const key = req.query.key
+    if (typeof key === 'string') {
+        try {
+            const allChats = await whatsAppInstances[key].buildChatList()
+            return res.json({
+                error: false,
+                message: "Todas as conversas da Instancia",
+                data: allChats
+            })
+        }catch(e) {
+            res.status(500).json({
+                error: true,
+                message: "Erro ao recuperar as conversas"
+            })
+        }
+    } else {
+        return res.status(404).json({
+            error: true,
+            message: "Informe a key da instancia"
+        })
+    }
 }
