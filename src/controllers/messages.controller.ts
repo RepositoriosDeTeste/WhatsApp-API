@@ -149,7 +149,7 @@ export async function sendMediaUrl(req: Request, res: Response) {
     const key = req.query.key
     if (typeof key === 'string') {
         try {
-            const data = await whatsAppInstances[key].sendUrlMediaMessage(req.body.id, req.body.url, req.body.type, req.body.mimetype)
+            const data = await whatsAppInstances[key].sendUrlMediaMessage(req.body.id, req.body.url, req.body.type, req.body.mimetype, req.body?.caption)
             res.status(201).send({
                 error: false,
                 data: data

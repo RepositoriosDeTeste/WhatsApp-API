@@ -274,16 +274,19 @@ export class WhatsAppInstance {
         return result
     }
 
-    async sendUrlMediaMessage(to: string, url: string, type: any, mimetype: any, caption: string = '') {
+    async sendUrlMediaMessage(to: string, url: string, type: any, mimetype: any, caption?: string) {
         await this.verifyWhatsAppId(this.getWhatsAppId(to))
         let content: any = {
             [type]: {url: url},
-            mimetype: mimetype
+            mimetype: mimetype,
+            caption: caption && typeof caption !== "boolean" ? caption : undefined,
+            ptt: caption && typeof caption === "boolean" ? caption : undefined
         }
         const result = await this.instance.sock?.sendMessage(
             this.getWhatsAppId(to),
             content
         )
+        console.log(result)
         return result
     }
 
